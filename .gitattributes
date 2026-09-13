@@ -1,0 +1,4 @@
+# Automator documents are XML plists, but the AppleScript sources embedded in
+# them use classic-Mac CR line endings. Never normalize line endings, always diff as text.
+*.wflow  -text diff
+*.plist  -text diff

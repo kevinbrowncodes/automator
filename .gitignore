@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+._*
+*.icloud
+# Finder custom-icon marker (resource fork; git cannot carry it)
+Icon
