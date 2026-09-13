@@ -26,8 +26,8 @@ Automator on every save, so expect them to churn.
 ./install.sh
 ```
 
-Copies everything in `quick-actions/` into `~/Library/Services/` and refreshes
-the Services menu.
+Copies everything in `quick-actions/` into `~/Library/Services/`, marks each one
+visible in Finder's context menu, and restarts Finder. Safe to re-run.
 
 **After editing a Quick Action in Automator**
 
@@ -85,6 +85,34 @@ These reference paths outside the repo and will need editing on another machine:
   the copy in `scripts/`. The script itself activates a venv at `~/venvs/audiosr`.
 - `AutomateCamp1.app` runs a binary on the external volume `Macintosh ED`.
 - `Extract Last Frame` hardcodes `/opt/homebrew/bin/ffmpeg`.
+
+## The gotcha that will bite you
+
+Copying a `.workflow` into `~/Library/Services/` is **not enough** to make it
+appear under right-click > Quick Actions. Two separate things have to happen:
+
+1. The system registers the bundle. A file copy does this on its own.
+2. The service is marked visible in the context menu, via an entry in the `pbs`
+   preference domain under `NSServicesStatus`.
+
+Automator writes that second entry for you when *you* save a Quick Action. A
+plain file copy does not, so the action registers but stays invisible, with no
+error and nothing to click. It also does not show up under the Customize item
+in that submenu, because that panel lists app extensions, not Automator actions.
+
+`install.sh` writes the entry for every Quick Action it installs, which is why
+you should install with the script rather than dragging bundles into
+`~/Library/Services/` by hand.
+
+Finder also builds this menu once at launch, so it needs a restart after any
+change. `install.sh` does that too.
+
+To check on a service by hand:
+
+```sh
+defaults read pbs NSServicesStatus            # is it listed and ContextMenu = 1?
+/System/Library/CoreServices/pbs -dump_pboard | grep 'Your Action'
+```
 
 ## Things git cannot carry
 
