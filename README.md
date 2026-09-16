@@ -53,6 +53,8 @@ directly, or edit them in Automator and save back into the same folder.
 - **Crop to Square**: center-crops the selected images to a 1:1 square and writes
   `<name>-square.<ext>` next to each original. Originals are untouched. Built on
   the `sips` tool that ships with macOS, so there is nothing to install.
+- **Crop to Vertical**: same idea, but center-crops to a 9:16 portrait frame
+  (Shorts / Reels / TikTok) and writes `<name>-vertical.<ext>`.
 - **Extract Last Frame**: saves the last frame of a movie as `<name>_lastframe.png`
   next to it. Needs Homebrew `ffmpeg`.
 - **New Text Document**: creates `New Text Document.txt` in the front Finder window.
