@@ -51,25 +51,42 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string>tell application "Finder"
-	if (count of windows) &gt; 0 then
-		set destFolder to (target of front window) as alias
-	else
-		set destFolder to (path to desktop folder)
-	end if
-	set destPath to POSIX path of destFolder
-end tell
-
-set newFilePath to destPath &amp; "New Text Document.txt"
-set i to 2
-tell application "System Events"
-	repeat while (exists disk item newFilePath)
-		set newFilePath to destPath &amp; "New Text Document (" &amp; i &amp; ").txt"
-		set i to i + 1
-	end repeat
-end tell
-
-do shell script "touch " &amp; quoted form of newFilePath</string>
+					<string>on run {input, parameters}
+	-- Right-clicking empty space passes the open folder; right-clicking an
+	-- item passes that item. Folders get the file inside, files beside them.
+	tell application "Finder"
+		if (count of input) &gt; 0 then
+			set clicked to item ((item 1 of input) as text)
+			if class of clicked is in {folder, disk} then
+				set destFolder to clicked as alias
+			else
+				set destFolder to (container of clicked) as alias
+			end if
+		else if (count of windows) &gt; 0 then
+			set destFolder to (target of front window) as alias
+		else
+			set destFolder to (path to desktop folder)
+		end if
+		set destPath to POSIX path of destFolder
+	end tell
+	
+	set newFilePath to destPath &amp; "New Text Document.txt"
+	set i to 2
+	tell application "System Events"
+		repeat while (exists disk item newFilePath)
+			set newFilePath to destPath &amp; "New Text Document (" &amp; i &amp; ").txt"
+			set i to i + 1
+		end repeat
+	end tell
+	
+	do shell script "touch " &amp; quoted form of newFilePath
+	
+	tell application "Finder"
+		activate
+		select (POSIX file newFilePath as alias)
+	end tell
+	return input
+end run</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>
@@ -151,7 +168,7 @@ end run</string>
 			<string>/System/Library/CoreServices/Finder.app</string>
 		</array>
 		<key>inputTypeIdentifier</key>
-		<string>com.apple.Automator.nothing</string>
+		<string>com.apple.Automator.fileSystemObject</string>
 		<key>outputTypeIdentifier</key>
 		<string>com.apple.Automator.nothing</string>
 		<key>presentationMode</key>
@@ -163,7 +180,7 @@ end run</string>
 		<key>serviceApplicationPath</key>
 		<string>/System/Library/CoreServices/Finder.app</string>
 		<key>serviceInputTypeIdentifier</key>
-		<string>com.apple.Automator.nothing</string>
+		<string>com.apple.Automator.fileSystemObject</string>
 		<key>serviceOutputTypeIdentifier</key>
 		<string>com.apple.Automator.nothing</string>
 		<key>serviceProcessesInput</key>
@@ -171,7 +188,7 @@ end run</string>
 		<key>systemImageName</key>
 		<string>NSTouchBarDocuments</string>
 		<key>useAutomaticInputType</key>
-		<true/>
+		<false/>
 		<key>workflowTypeIdentifier</key>
 		<string>com.apple.Automator.servicesMenu</string>
 	</dict>

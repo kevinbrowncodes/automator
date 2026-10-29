@@ -57,7 +57,9 @@ directly, or edit them in Automator and save back into the same folder.
   (Shorts / Reels / TikTok) and writes `<name>-vertical.<ext>`.
 - **Extract Last Frame**: saves the last frame of a movie as `<name>_lastframe.png`
   next to it. Needs Homebrew `ffmpeg`.
-- **New Text Document**: creates `New Text Document.txt` in the front Finder window.
+- **New Text Document**: right-click empty space in a Finder window (or a folder)
+  and pick it to create `New Text Document.txt` there, selected and ready to
+  rename with Return. Right-clicking a file puts it next to that file.
 - **Open in Visual Studio Code**: opens the selection in a new VS Code window.
 
 ### Workflows
