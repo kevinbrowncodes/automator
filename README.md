@@ -109,10 +109,14 @@ you should install with the script rather than dragging bundles into
 There is a second, quieter way to vanish: a Quick Action set to receive **no
 input**. Finder only lists actions in the right-click menu if they take
 something (files, folders, images, text), so a no-input action lands only under
-Finder > Services in the menu bar. A right-click on empty space passes the open
-folder, so an action that works on "the current folder" should receive files or
-folders and read the folder from its input. `gates/quick-actions-take-input.sh`
-fails the push if any action here receives nothing; `install.sh` turns the hook on.
+Finder > Services in the menu bar. `gates/quick-actions-take-input.sh` fails the
+push if any action here receives nothing; `install.sh` turns the hook on.
+
+No Quick Action can appear when you right-click **empty space** in a folder:
+that click clears Finder's selection, so there is nothing to pass and Finder
+leaves the Quick Actions section out of the menu. Something that should work on
+"the current folder" from empty space needs a Finder Sync extension instead, as
+in `kevinbrowncodes/finder-new-file`.
 
 Finder also builds this menu once at launch, so it needs a restart after any
 change. `install.sh` does that too.
