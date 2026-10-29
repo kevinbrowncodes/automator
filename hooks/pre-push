@@ -1,0 +1,9 @@
+#!/bin/zsh
+# Runs every gate in gates/. Any failure blocks the push.
+# install.sh points git at this folder (core.hooksPath = hooks).
+cd "$(git rev-parse --show-toplevel)"
+rc=0
+for gate in gates/*.sh(N); do
+  "$gate" || rc=1
+done
+exit $rc

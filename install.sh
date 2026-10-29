@@ -9,6 +9,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Run the gates in gates/ before every push.
+git config core.hooksPath hooks
+
 dest="$HOME/Library/Services"
 mkdir -p "$dest"
 

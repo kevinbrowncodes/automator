@@ -12,6 +12,7 @@ Automator applications, and the shell scripts they call.
 | `applications/` | Automator `.app` bundles (double-click or drop files on them) | anywhere |
 | `folder-actions/` | Folder Action workflows (none yet) | `~/Library/Workflows/Applications/Folder Actions/` |
 | `scripts/` | Shell scripts referenced by the above | anywhere |
+| `gates/` | Checks that block a push when a rule is broken (run by `hooks/pre-push`) | n/a |
 
 Automator documents are bundles: a `.workflow` or `.app` is a folder, and the
 real content is `Contents/document.wflow` (an XML plist). That file is what
@@ -107,6 +108,14 @@ in that submenu, because that panel lists app extensions, not Automator actions.
 `install.sh` writes the entry for every Quick Action it installs, which is why
 you should install with the script rather than dragging bundles into
 `~/Library/Services/` by hand.
+
+There is a second, quieter way to vanish: a Quick Action set to receive **no
+input**. Finder only lists actions in the right-click menu if they take
+something (files, folders, images, text), so a no-input action lands only under
+Finder > Services in the menu bar. A right-click on empty space passes the open
+folder, so an action that works on "the current folder" should receive files or
+folders and read the folder from its input. `gates/quick-actions-take-input.sh`
+fails the push if any action here receives nothing; `install.sh` turns the hook on.
 
 Finder also builds this menu once at launch, so it needs a restart after any
 change. `install.sh` does that too.
