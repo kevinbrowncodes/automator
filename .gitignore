@@ -4,3 +4,7 @@
 *.icloud
 # Finder custom-icon marker (resource fork; git cannot carry it)
 Icon
+
+# Python
+__pycache__/
+.coverage

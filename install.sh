@@ -21,6 +21,15 @@ for wf in quick-actions/*.workflow; do
   echo "installed  $name"
 done
 
+# Scripts that Quick Actions call. They run from this installed copy, not from
+# the repo, so moving or renaming the clone can't break an action.
+support="$HOME/Library/Application Support/automator"
+mkdir -p "$support"
+for s in scripts/contact_sheet.py; do
+  install -m 755 "$s" "$support/${s:t}"
+  echo "installed  ${s:t} -> $support"
+done
+
 # Mark every installed Quick Action as visible in the context menu.
 python3 - "$dest" <<'PY'
 import os, plistlib, subprocess, sys, tempfile

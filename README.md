@@ -11,7 +11,8 @@ Automator applications, and the shell scripts they call.
 | `workflows/` | Standalone `.workflow` files you open and run from Automator | anywhere |
 | `applications/` | Automator `.app` bundles (double-click or drop files on them) | anywhere |
 | `folder-actions/` | Folder Action workflows (none yet) | `~/Library/Workflows/Applications/Folder Actions/` |
-| `scripts/` | Shell scripts referenced by the above | anywhere |
+| `scripts/` | Scripts referenced by the above | `contact_sheet.py` is copied to `~/Library/Application Support/automator/`; the rest run from wherever they're called |
+| `tests/` | Tests for the scripts (run by the `contact-sheet` gate) | n/a |
 | `gates/` | Checks that block a push when a rule is broken (run by `hooks/pre-push`) | n/a |
 
 Automator documents are bundles: a `.workflow` or `.app` is a folder, and the
@@ -27,8 +28,10 @@ Automator on every save, so expect them to churn.
 ./install.sh
 ```
 
-Copies everything in `quick-actions/` into `~/Library/Services/`, marks each one
-visible in Finder's context menu, and restarts Finder. Safe to re-run.
+Copies everything in `quick-actions/` into `~/Library/Services/`, copies the
+scripts they call into `~/Library/Application Support/automator/`, marks each
+Quick Action visible in Finder's context menu, and restarts Finder. Safe to re-run.
+After editing `scripts/contact_sheet.py`, re-run it so the action picks up the change.
 
 **After editing a Quick Action in Automator**
 
@@ -51,6 +54,17 @@ directly, or edit them in Automator and save back into the same folder.
 - **Claude - ask**, **Claude - codeHere**, **Claude - send**: installed by the
   Claude desktop app. Selected text, folder, or files go to Claude via the
   `claude://` URL scheme.
+- **Contact Sheet**: for each selected video, writes `<name>.contact.jpg` next to
+  it and opens it in Preview. Top: a frame every 0.5 s in 6 columns of ~448 px
+  tiles, each stamped with its time (`0:12.5`). Bottom, under "Seams": the frames
+  0.1 s before and 0.3 s after each 10 s mark, side by side, to spot a jump where
+  two 10-second shots were joined (none if the video is too short to have one).
+  No dialog: one click. A thin wrapper around `scripts/contact_sheet.py`, which
+  grabs each frame with its own `ffmpeg -ss <t> -i` call (never the select/fps
+  filters, which can fake a frozen hold) and lays the sheet out with Pillow,
+  since Homebrew's ffmpeg has no drawtext. About 3 s for a 30 s 1344x768 take.
+  Problems (not a video, ffmpeg error) show as notifications. Needs Homebrew
+  `ffmpeg` and `python3` with Pillow.
 - **Crop to Square**: center-crops the selected images to a 1:1 square and writes
   `<name>-square.<ext>` next to each original. Originals are untouched. Built on
   the `sips` tool that ships with macOS, so there is nothing to install.
@@ -87,6 +101,9 @@ These reference paths outside the repo and will need editing on another machine:
   the copy in `scripts/`. The script itself activates a venv at `~/venvs/audiosr`.
 - `AutomateCamp1.app` runs a binary on the external volume `Macintosh ED`.
 - `Extract Last Frame` hardcodes `/opt/homebrew/bin/ffmpeg`.
+- `Contact Sheet` hardcodes `/opt/homebrew/bin/{ffmpeg,ffprobe,python3}`, and needs
+  Pillow in that Python (`python3 -m pip install --break-system-packages Pillow`).
+  If a Homebrew Python upgrade loses Pillow, the action says so in a notification.
 
 ## The gotcha that will bite you
 
@@ -127,6 +144,16 @@ To check on a service by hand:
 defaults read pbs NSServicesStatus            # is it listed and ContextMenu = 1?
 /System/Library/CoreServices/pbs -dump_pboard | grep 'Your Action'
 ```
+
+## Gates
+
+`hooks/pre-push` runs every `gates/*.sh`; `install.sh` turns the hook on.
+
+- `quick-actions-take-input`: every Quick Action receives input (see "The gotcha" above).
+- `contact-sheet`: `tests/test_contact_sheet.py` passes with at least 95% line
+  coverage of `scripts/contact_sheet.py`. Needs `coverage` in Homebrew Python.
+- `no-select-filter-frames`: nothing extracts frames with ffmpeg's `select=` or
+  `fps=` filters.
 
 ## Things git cannot carry
 
