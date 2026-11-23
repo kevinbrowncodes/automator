@@ -11,8 +11,8 @@ Automator applications, and the shell scripts they call.
 | `workflows/` | Standalone `.workflow` files you open and run from Automator | anywhere |
 | `applications/` | Automator `.app` bundles (double-click or drop files on them) | anywhere |
 | `folder-actions/` | Folder Action workflows (none yet) | `~/Library/Workflows/Applications/Folder Actions/` |
-| `scripts/` | Scripts referenced by the above | `contact_sheet.py` is copied to `~/Library/Application Support/automator/`; the rest run from wherever they're called |
-| `tests/` | Tests for the scripts (run by the `contact-sheet` gate) | n/a |
+| `scripts/` | Scripts referenced by the above | `contact_sheet.py` and `extract_audio.py` are copied to `~/Library/Application Support/automator/`; the rest run from wherever they're called |
+| `tests/` | Tests for the scripts (run by the `python-scripts` gate) | n/a |
 | `gates/` | Checks that block a push when a rule is broken (run by `hooks/pre-push`) | n/a |
 
 Automator documents are bundles: a `.workflow` or `.app` is a folder, and the
@@ -31,7 +31,7 @@ Automator on every save, so expect them to churn.
 Copies everything in `quick-actions/` into `~/Library/Services/`, copies the
 scripts they call into `~/Library/Application Support/automator/`, marks each
 Quick Action visible in Finder's context menu, and restarts Finder. Safe to re-run.
-After editing `scripts/contact_sheet.py`, re-run it so the action picks up the change.
+After editing a script in `scripts/`, re-run it so the action picks up the change.
 
 **After editing a Quick Action in Automator**
 
@@ -70,6 +70,16 @@ directly, or edit them in Automator and save back into the same folder.
   the `sips` tool that ships with macOS, so there is nothing to install.
 - **Crop to Vertical**: same idea, but center-crops to a 9:16 portrait frame
   (Shorts / Reels / TikTok) and writes `<name>-vertical.<ext>`.
+- **Extract Audio**: for each selected video, copies its first audio track into a
+  file next to it named after the video, with no re-encode, so the audio is bit for
+  bit what the video held and it takes about a second at any length. The extension
+  follows the codec: `.m4a` for AAC (most MP4/MOV), `.mp3`, `.opus`, `.flac`, `.wav`
+  for PCM (big-endian camera PCM is rewritten little-endian, same samples), and
+  `.mka` for anything else. Never overwrites: a second run writes `<name> 2.m4a`.
+  Silent on success; problems (no audio track, not a video) show as notifications.
+  A thin wrapper around `scripts/extract_audio.py`. Needs Homebrew `ffmpeg`.
+  Watch out: ffmpeg 8 exits 0 when `-n` refuses to overwrite, so the script goes
+  by ffmpeg's message, not its exit code.
 - **Extract Last Frame**: saves the last frame of a movie as `<name>_lastframe.png`
   next to it. Needs Homebrew `ffmpeg`.
 - **Open in Visual Studio Code**: opens the selection in a new VS Code window.
@@ -100,6 +110,7 @@ These reference paths outside the repo and will need editing on another machine:
   (`~/Library/Mobile Documents/com~apple~Automator/Documents/Scripts/`), not
   the copy in `scripts/`. The script itself activates a venv at `~/venvs/audiosr`.
 - `AutomateCamp1.app` runs a binary on the external volume `Macintosh ED`.
+- `Extract Audio` hardcodes `/opt/homebrew/bin/{ffmpeg,ffprobe,python3}`.
 - `Extract Last Frame` hardcodes `/opt/homebrew/bin/ffmpeg`.
 - `Contact Sheet` hardcodes `/opt/homebrew/bin/{ffmpeg,ffprobe,python3}`, and needs
   Pillow in that Python (`python3 -m pip install --break-system-packages Pillow`).
@@ -150,8 +161,9 @@ defaults read pbs NSServicesStatus            # is it listed and ContextMenu = 1
 `hooks/pre-push` runs every `gates/*.sh`; `install.sh` turns the hook on.
 
 - `quick-actions-take-input`: every Quick Action receives input (see "The gotcha" above).
-- `contact-sheet`: `tests/test_contact_sheet.py` passes with at least 95% line
-  coverage of `scripts/contact_sheet.py`. Needs `coverage` in Homebrew Python.
+- `python-scripts`: every test in `tests/` passes, and every `scripts/*.py` has at
+  least 95% line coverage on its own, so a new script with no tests blocks the push.
+  Needs `coverage` and Pillow in Homebrew Python.
 - `no-select-filter-frames`: nothing extracts frames with ffmpeg's `select=` or
   `fps=` filters.
 

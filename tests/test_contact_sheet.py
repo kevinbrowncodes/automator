@@ -1,4 +1,4 @@
-"""Tests for scripts/contact_sheet.py. Run by gates/contact-sheet.sh on every push.
+"""Tests for scripts/contact_sheet.py. Run by gates/python-scripts.sh on every push.
 
     /opt/homebrew/bin/python3 -m unittest discover -s tests
 

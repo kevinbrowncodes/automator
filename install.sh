@@ -25,7 +25,7 @@ done
 # the repo, so moving or renaming the clone can't break an action.
 support="$HOME/Library/Application Support/automator"
 mkdir -p "$support"
-for s in scripts/contact_sheet.py; do
+for s in scripts/contact_sheet.py scripts/extract_audio.py; do
   install -m 755 "$s" "$support/${s:t}"
   echo "installed  ${s:t} -> $support"
 done
